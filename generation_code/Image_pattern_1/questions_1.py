@@ -1,0 +1,77 @@
+import json
+
+
+
+def make_example(question, i, q, name):
+    return {"image_index": i,
+           "split": "test",
+           "image_filename": f"{name}.png",
+           "question_index": q,
+           "question": question}
+
+def make_dataset(questions):
+    return {"info": {"split": "test", "license": "-", "version": "1.0", "date": "09/15/2023"},
+           "questions": questions}
+
+
+template_1 = lambda obj_1, obj_2, obj_3: f"There is an object in front of a {obj_1['shape']}, in front of a {obj_2['shape']}, in front of a {obj_3['shape']}, behind a {obj_2['shape']}, what color is it?"
+template_2 = lambda obj_1, obj_2, obj_3: f"There is an object in front of a {obj_1['shape']}, in front of a {obj_2['shape']}, in front of a {obj_3['shape']}, behind a {obj_2['shape']}, what shape is it?"
+template_3 = lambda obj_1, obj_2, obj_3: f"There is an object in front of a {obj_1['shape']}, in front of a {obj_2['shape']}, in front of a {obj_3['shape']}, behind a {obj_2['shape']}, behind a cylinder, what color is it?"
+template_4 = lambda obj_1, obj_2, obj_3: f"There is an object in front of a {obj_1['shape']}, in front of a {obj_2['shape']}, in front of a {obj_3['shape']}, behind a {obj_2['shape']}, behind a cylinder, what shape is it?"
+
+
+path_to_folder = ""
+
+
+with open(path_to_folder + "info.json") as f:
+    info = json.load(f)
+
+temp_list = [template_1, template_2, template_3, template_4]
+path_to_folder = "C:\\tmp\\"
+
+
+with open(path_to_folder + "info.json") as f:
+    info = json.load(f)
+
+questions = []
+question_type = ""
+correct_answer = ""
+k = 0 # number of question
+for img in range(len(info)):
+    obj_1 = info[img][1]['0']
+    obj_2 = info[img][1]['1']
+    obj_3 = info[img][1]['2']
+    corr_obj = info[img][1]['3']
+
+    name = info[img][0]
+    for j in range(len(temp_list)):
+        
+        if j == 0:
+            questions.append(make_example(temp_list[j](obj_1, obj_2, obj_3), img, k, name))
+            correct_answer += str(corr_obj['color']) + '\n'
+            question_type += 'color_name' + '\n'
+        elif j == 1:
+            questions.append(make_example(temp_list[j](obj_1, obj_2, obj_3), img, k, name))
+            correct_answer += str(corr_obj['shape']) + '\n'
+            question_type += 'shape_name' + '\n'
+        elif j == 2:
+            questions.append(make_example(temp_list[j](obj_1, obj_2, obj_3), img, k, name))
+            correct_answer += str(corr_obj['color']) + '\n'
+            question_type += 'color_name' + '\n'
+        elif j == 3:
+            questions.append(make_example(temp_list[j](obj_1, obj_2, obj_3), img, k, name))
+            correct_answer += str(corr_obj['shape']) + '\n'
+            question_type += 'shape_name' + '\n'
+
+        k += 1
+
+answer = make_dataset(questions)
+
+with open('C:\\tmp\\CLEVR_test_questions.json', 'w', encoding='utf-8') as json_file:
+        json.dump(answer, json_file)
+
+with open('C:\\tmp\\correct_answ.txt', 'w', encoding='utf-8') as f:
+        f.write(correct_answer)
+
+with open('C:\\tmp\\question_type.txt', 'w', encoding='utf-8') as f:
+        f.write(question_type)
